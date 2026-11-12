@@ -1,0 +1,71 @@
+# Watches Hetzner Cloud for the CX23 server type and emails once it can be ordered.
+# Plan, glossary and setup: hetzner-cron-job/README.md
+name: hetzner-cx23
+
+on:
+  schedule:
+    # Every 10 minutes, UTC. Off the :00 mark because GitHub delays top-of-hour runs the most.
+    - cron: "7,17,27,37,47,57 * * * *"
+  workflow_dispatch:
+    inputs:
+      force_available:
+        description: "Pretend CX23 is available (tests the mail path, does not disable the workflow)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  actions: write # lets the last step disable this workflow
+
+concurrency:
+  group: hetzner-cx23
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          sparse-checkout: hetzner-cron-job
+
+      - name: Check CX23 stock
+        id: check
+        env:
+          HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+          SERVER_TYPE: cx23
+          FORCE_AVAILABLE: ${{ inputs.force_available || false }}
+        run: bash hetzner-cron-job/check-stock.sh
+
+      - name: Send mail
+        if: steps.check.outputs.available == 'true'
+        # Pinned to a commit SHA: this third-party action receives SMTP_PASSWORD,
+        # and a tag can be moved to other code. 47af4a1… = tag v23.
+        uses: dawidd6/action-send-mail@47af4a10b540781705f283a2cf1a9650713ac795
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          from: Hetzner watcher <${{ secrets.SMTP_USERNAME }}>
+          to: ${{ secrets.MAIL_TO }}
+          subject: "Hetzner CX23 is available (${{ steps.check.outputs.locations }})"
+          body: |
+            CX23 can be ordered now in: ${{ steps.check.outputs.locations }}
+
+            Order: https://console.hetzner.com/
+            Product page: https://www.hetzner.com/cloud/cost-optimized/
+
+            This watcher disables itself after this mail.
+            Re-enable: GitHub → Actions → hetzner-cx23 → Enable workflow.
+            Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+      - name: Stop watching
+        if: steps.check.outputs.available == 'true' && !inputs.force_available
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WORKFLOW: ${{ github.workflow }}
+          REPO: ${{ github.repository }}
+        run: gh workflow disable "$WORKFLOW" --repo "$REPO"
