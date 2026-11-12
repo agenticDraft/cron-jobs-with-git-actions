@@ -40,7 +40,9 @@ jobs:
 
       - name: Send mail
         if: steps.check.outputs.available == 'true'
-        uses: dawidd6/action-send-mail@v23
+        # Pinned to a commit SHA: this third-party action receives SMTP_PASSWORD,
+        # and a tag can be moved to other code. 47af4a1… = tag v23.
+        uses: dawidd6/action-send-mail@47af4a10b540781705f283a2cf1a9650713ac795
         with:
           server_address: smtp.gmail.com
           server_port: 465

@@ -10,6 +10,13 @@ Files:
   secrets, mail, self-disable. It must live in `.github/workflows/` at the repo root; GitHub reads
   workflows from nowhere else, so this folder holds everything except that one file.
 
+## Quick start
+
+1. Create a read-only Hetzner API token and a Gmail App Password — [Phase 1](#phase-1--accounts-and-secrets).
+2. Add the four repo secrets with `gh secret set` — Phase 1 / Task 3.
+3. Merge the pull request into `main` — schedules run only from the default branch.
+4. Run the four checks in [Phase 3](#phase-3--verification). The last one proves it works.
+
 ## The problem it solves
 
 The product page <https://www.hetzner.com/cloud/cost-optimized/> shows CX23 as
@@ -34,7 +41,7 @@ Every term used below, in plain words.
 - **Runner** — the machine that executes the job. `ubuntu-latest` is a GitHub-hosted Linux VM
   with `curl`, `jq` and `gh` preinstalled. Free for public repositories.
 - **Action** — a reusable step someone published, referenced as `owner/repo@version`.
-  `actions/checkout@v5` copies the repo onto the runner; `dawidd6/action-send-mail@v23` sends mail.
+  `actions/checkout@v5` copies the repo onto the runner; `dawidd6/action-send-mail` (pinned to the commit SHA of tag v23, because it receives the SMTP password) sends mail.
 - **Step output** — a key=value a step writes to the file at `$GITHUB_OUTPUT`. Later steps read
   it as `steps.<id>.outputs.<key>`. This is how "is it available?" travels from the check to the mail.
 - **`if:` condition** — a step only runs when its condition is true. Mail and self-disable run
