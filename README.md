@@ -1,6 +1,6 @@
-# cron-jobs-with-git-actions
+# github-workflows
 
-Small watchers and scheduled jobs that run on GitHub Actions instead of on a laptop.
+GitHub Actions workflows for different purposes — watchers, scheduled jobs, automation — that run on GitHub instead of on a laptop.
 
 Each job has its own folder with a README (what, why, setup, verification) and its script.
 Its workflow file lives in `.github/workflows/`, because GitHub reads workflows only from there.

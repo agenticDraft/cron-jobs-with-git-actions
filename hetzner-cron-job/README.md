@@ -148,10 +148,10 @@ the default.
   Or with the GitHub CLI, which prompts for each value so it never lands in shell history:
 
   ```bash
-  gh secret set HCLOUD_TOKEN  --repo agenticDraft/cron-jobs-with-git-actions
-  gh secret set SMTP_USERNAME --repo agenticDraft/cron-jobs-with-git-actions
-  gh secret set SMTP_PASSWORD --repo agenticDraft/cron-jobs-with-git-actions
-  gh secret set MAIL_TO       --repo agenticDraft/cron-jobs-with-git-actions
+  gh secret set HCLOUD_TOKEN  --repo agenticDraft/github-workflows
+  gh secret set SMTP_USERNAME --repo agenticDraft/github-workflows
+  gh secret set SMTP_PASSWORD --repo agenticDraft/github-workflows
+  gh secret set MAIL_TO       --repo agenticDraft/github-workflows
   ```
 
 ### Phase 2 — Code (done in this folder)
@@ -174,8 +174,8 @@ the default.
 - **Phase 3 / Task 2** — Real API, normal path. After the merge:
 
   ```bash
-  gh workflow run hetzner-cx23 --repo agenticDraft/cron-jobs-with-git-actions
-  gh run watch --repo agenticDraft/cron-jobs-with-git-actions
+  gh workflow run hetzner-cx23 --repo agenticDraft/github-workflows
+  gh run watch --repo agenticDraft/github-workflows
   ```
 
   Expect a green run whose "Check CX23 stock" log shows
@@ -184,7 +184,7 @@ the default.
 - **Phase 3 / Task 3** — Mail path. Run with the test switch:
 
   ```bash
-  gh workflow run hetzner-cx23 -f force_available=true --repo agenticDraft/cron-jobs-with-git-actions
+  gh workflow run hetzner-cx23 -f force_available=true --repo agenticDraft/github-workflows
   ```
 
   Expect a mail "Hetzner CX23 is available (TEST)" in the `MAIL_TO` inbox, and the workflow still
@@ -193,7 +193,7 @@ the default.
 - **Phase 3 / Task 4** — Schedule is live. About 30 minutes after the merge:
 
   ```bash
-  gh run list --workflow hetzner-cx23 --event schedule --repo agenticDraft/cron-jobs-with-git-actions
+  gh run list --workflow hetzner-cx23 --event schedule --repo agenticDraft/github-workflows
   ```
 
   At least one scheduled run listed, all green. This is the check that proves the watcher works.
